@@ -15,6 +15,8 @@ const reviewRoutes = require('./routes/reviews');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
+const rootDir = path.join(__dirname, '..');
+const frontendDir = path.join(rootDir, 'frontend');
 
 app.use(cors());
 app.use(express.json());
@@ -57,10 +59,13 @@ app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running' });
 });
 
-app.use(express.static(path.join(__dirname, '..')));
+app.use('/css', express.static(path.join(rootDir, 'css')));
+app.use('/js', express.static(path.join(rootDir, 'js')));
+app.use('/frontend', express.static(frontendDir));
+app.use(express.static(rootDir));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+  res.sendFile(path.join(frontendDir, 'index.html'));
 });
 
 app.use(errorHandler);
