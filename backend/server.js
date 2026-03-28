@@ -5,6 +5,8 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const User = require('./models/User');
+const Product = require('./models/Product');
+const Service = require('./models/Service');
 
 const authRoutes = require('./routes/auth');
 const marketplaceRoutes = require('./routes/marketplace');
@@ -45,7 +47,131 @@ const seedAdmin = async () => {
   }
 };
 
-seedAdmin();
+const ensureDemoMarketplaceData = async () => {
+  try {
+    const entrepreneurCount = await User.countDocuments({ role: 'entrepreneur' });
+    if (entrepreneurCount > 0) {
+      return;
+    }
+
+    const demoEntrepreneurs = await User.create([
+      {
+        name: 'Ramesh Cobbler',
+        email: 'ramesh.cobbler@hunarhub.local',
+        password: 'Demo@123',
+        role: 'entrepreneur',
+        phone: '9876543210',
+        location: 'Jaipur',
+        bio: 'Footwear repair specialist serving local communities with affordable and durable workmanship.',
+        skillType: 'cobbler',
+        skills: ['Shoe Repair', 'Leather Stitching', 'Polishing'],
+        experienceYears: 12,
+        pricingDetails: 'Starts from Rs 80',
+        availability: 'Available 10 AM - 7 PM',
+        isVerified: true
+      },
+      {
+        name: 'Meera Kumhar',
+        email: 'meera.potter@hunarhub.local',
+        password: 'Demo@123',
+        role: 'entrepreneur',
+        phone: '9988776655',
+        location: 'Udaipur',
+        bio: 'Traditional potter creating handmade clay decor, kitchenware, and festive items.',
+        skillType: 'potter',
+        skills: ['Clay Pots', 'Decor Items', 'Custom Pottery'],
+        experienceYears: 9,
+        pricingDetails: 'Starts from Rs 150',
+        availability: 'Orders accepted daily',
+        isVerified: true
+      },
+      {
+        name: 'Sana Tailors',
+        email: 'sana.tailor@hunarhub.local',
+        password: 'Demo@123',
+        role: 'entrepreneur',
+        phone: '9090909090',
+        location: 'Delhi',
+        bio: 'Tailoring and alteration services for daily wear, custom stitching, and occasion outfits.',
+        skillType: 'tailor',
+        skills: ['Alterations', 'Custom Stitching', 'Women Tailoring'],
+        experienceYears: 11,
+        pricingDetails: 'Starts from Rs 200',
+        availability: 'Available on weekdays and weekends',
+        isVerified: true
+      }
+    ]);
+
+    await Product.insertMany([
+      {
+        name: 'Handcrafted Leather Sandal Repair',
+        description: 'Repair package for worn-out sandals with stitching and sole reinforcement.',
+        price: 120,
+        category: 'cobbler',
+        location: 'Jaipur',
+        seller: demoEntrepreneurs[0]._id,
+        stock: 10
+      },
+      {
+        name: 'Decorative Clay Vase',
+        description: 'Handmade painted clay vase crafted by a traditional potter.',
+        price: 450,
+        category: 'potter',
+        location: 'Udaipur',
+        seller: demoEntrepreneurs[1]._id,
+        stock: 6
+      },
+      {
+        name: 'Hand-stitched Cotton Kurti',
+        description: 'Locally tailored kurti with custom fitting and breathable cotton fabric.',
+        price: 850,
+        category: 'tailor',
+        location: 'Delhi',
+        seller: demoEntrepreneurs[2]._id,
+        stock: 8
+      }
+    ]);
+
+    await Service.insertMany([
+      {
+        entrepreneur: demoEntrepreneurs[0]._id,
+        title: 'Shoe Repair Service',
+        description: 'Repair of torn shoes, sole replacement, and leather restoration.',
+        category: 'cobbler',
+        location: 'Jaipur',
+        price: 150,
+        priceUnit: 'per pair',
+        availability: 'Same-day service available'
+      },
+      {
+        entrepreneur: demoEntrepreneurs[1]._id,
+        title: 'Custom Pottery Order',
+        description: 'Custom clay decor and utility pottery for homes and events.',
+        category: 'potter',
+        location: 'Udaipur',
+        price: 300,
+        priceUnit: 'per order',
+        availability: '3-5 days turnaround'
+      },
+      {
+        entrepreneur: demoEntrepreneurs[2]._id,
+        title: 'Dress Alteration and Stitching',
+        description: 'Tailoring, fitting, and alterations for casual and occasion wear.',
+        category: 'tailor',
+        location: 'Delhi',
+        price: 250,
+        priceUnit: 'per service',
+        availability: 'Bookings open all week'
+      }
+    ]);
+
+    console.log('Demo marketplace data created');
+  } catch (error) {
+    console.error('Demo data bootstrap failed:', error.message);
+  }
+};
+
+seedAdmin().then(ensureDemoMarketplaceData);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/marketplace', marketplaceRoutes);

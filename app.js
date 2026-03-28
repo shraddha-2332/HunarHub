@@ -3,7 +3,8 @@ const appState = {
   products: [],
   services: [],
   orders: [],
-  serviceRequests: []
+  serviceRequests: [],
+  modalContext: null
 };
 
 function navigateTo(sectionId) {
@@ -38,6 +39,7 @@ function titleCase(value = '') {
 }
 
 function closeModal() {
+  appState.modalContext = null;
   document.getElementById('modal').classList.add('hidden');
   document.getElementById('modalBody').innerHTML = '';
 }
@@ -57,9 +59,9 @@ function requireLogin(nextSection = 'auth') {
 }
 
 async function refreshAppData() {
-  await Promise.all([loadHome(), loadEntrepreneurs(), loadProducts(), loadServices()]);
+  await Promise.allSettled([loadHome(), loadEntrepreneurs(), loadProducts(), loadServices()]);
   if (authState.isLoggedIn) {
-    await Promise.all([loadTransactionalData(), loadDashboard()]);
+    await Promise.allSettled([loadTransactionalData(), loadDashboard()]);
   } else {
     renderOrders([]);
     renderServiceRequests([]);
@@ -68,9 +70,11 @@ async function refreshAppData() {
 }
 
 async function loadHome() {
-  const entrepreneurs = await API.getEntrepreneurs({});
-  const products = await API.getProducts({});
-  const services = await API.getServices({});
+  const [entrepreneurs, products, services] = await Promise.all([
+    API.getEntrepreneurs({}),
+    API.getProducts({}),
+    API.getServices({})
+  ]);
   appState.entrepreneurs = entrepreneurs;
   appState.products = products;
   appState.services = services;
@@ -192,11 +196,15 @@ function getEntrepreneurFilters() {
 }
 
 async function loadEntrepreneurs() {
-  const entrepreneurs = await API.getEntrepreneurs(getEntrepreneurFilters());
-  appState.entrepreneurs = entrepreneurs;
-  document.getElementById('entrepreneursGrid').innerHTML = entrepreneurs.length
-    ? entrepreneurs.map(renderEntrepreneurCard).join('')
-    : showEmptyState('No entrepreneurs matched those filters.');
+  try {
+    const entrepreneurs = await API.getEntrepreneurs(getEntrepreneurFilters());
+    appState.entrepreneurs = entrepreneurs;
+    document.getElementById('entrepreneursGrid').innerHTML = entrepreneurs.length
+      ? entrepreneurs.map(renderEntrepreneurCard).join('')
+      : showEmptyState('No entrepreneurs matched those filters.');
+  } catch (error) {
+    document.getElementById('entrepreneursGrid').innerHTML = showEmptyState('Unable to load entrepreneurs right now.');
+  }
 }
 
 function renderEntrepreneurCard(entrepreneur) {
@@ -271,10 +279,11 @@ function getProductFilters() {
 }
 
 async function loadProducts() {
-  const products = await API.getProducts(getProductFilters());
-  appState.products = products;
-  document.getElementById('productsGrid').innerHTML = products.length
-    ? products.map((product) => `
+  try {
+    const products = await API.getProducts(getProductFilters());
+    appState.products = products;
+    document.getElementById('productsGrid').innerHTML = products.length
+      ? products.map((product) => `
       <article class="card">
         <div class="badge-row">
           <span class="badge">${titleCase(product.category)}</span>
@@ -287,7 +296,10 @@ async function loadProducts() {
         <button class="primary-btn" onclick="orderProduct('${product._id}')">Buy Now</button>
       </article>
     `).join('')
-    : showEmptyState('No products found for the selected filters.');
+      : showEmptyState('No products found for the selected filters.');
+  } catch (error) {
+    document.getElementById('productsGrid').innerHTML = showEmptyState('Unable to load products right now.');
+  }
 }
 
 function getServiceFilters() {
@@ -301,10 +313,11 @@ function getServiceFilters() {
 }
 
 async function loadServices() {
-  const services = await API.getServices(getServiceFilters());
-  appState.services = services;
-  document.getElementById('servicesGrid').innerHTML = services.length
-    ? services.map((service) => `
+  try {
+    const services = await API.getServices(getServiceFilters());
+    appState.services = services;
+    document.getElementById('servicesGrid').innerHTML = services.length
+      ? services.map((service) => `
       <article class="card">
         <div class="badge-row">
           <span class="badge">${titleCase(service.category)}</span>
@@ -317,27 +330,50 @@ async function loadServices() {
         <button class="primary-btn" onclick="requestService('${service._id}')">Place Request</button>
       </article>
     `).join('')
-    : showEmptyState('No services found for the selected filters.');
+      : showEmptyState('No services found for the selected filters.');
+  } catch (error) {
+    document.getElementById('servicesGrid').innerHTML = showEmptyState('Unable to load services right now.');
+  }
 }
 
 async function orderProduct(productId) {
   if (!requireLogin()) return;
 
   const product = appState.products.find((item) => item._id === productId) || await API.getProduct(productId);
-  const quantity = Number(prompt(`Enter quantity for ${product.name}`, '1'));
-  if (!quantity) return;
-  const shippingAddress = prompt('Enter delivery address');
-  if (!shippingAddress) return;
+  appState.modalContext = { type: 'order', productId: product._id };
+  openModal(`
+    <div class="stack-list">
+      <h3>Place Order</h3>
+      <p><strong>${product.name}</strong></p>
+      <p class="card-meta">Price: Rs ${product.price} | Seller: ${product.seller?.name || 'Local entrepreneur'}</p>
+      <div class="form-grid">
+        <input id="orderQuantity" type="number" min="1" value="1" placeholder="Quantity">
+        <input id="orderAddress" type="text" placeholder="Delivery address">
+        <button class="primary-btn" onclick="submitOrder()">Confirm Order</button>
+      </div>
+    </div>
+  `);
+}
+
+async function submitOrder() {
+  const productId = appState.modalContext?.productId;
+  const quantity = Number(document.getElementById('orderQuantity')?.value);
+  const shippingAddress = document.getElementById('orderAddress')?.value.trim();
+
+  if (!productId || !quantity || !shippingAddress) {
+    alert('Please fill quantity and delivery address');
+    return;
+  }
 
   try {
     await API.createOrder({
-      items: [{ product: product._id, quantity }],
+      items: [{ product: productId, quantity }],
       shippingAddress,
       paymentMethod: 'cash_on_delivery'
     });
     showNotification('Order placed successfully');
     closeModal();
-    await loadTransactionalData();
+    await Promise.allSettled([loadTransactionalData(), loadDashboard()]);
   } catch (error) {
     alert(error.message);
   }
@@ -347,11 +383,34 @@ async function requestService(serviceId) {
   if (!requireLogin()) return;
 
   const service = appState.services.find((item) => item._id === serviceId);
-  const description = prompt(`Describe your request for "${service?.title || 'this service'}"`);
-  if (!description) return;
-  const location = prompt('Enter service location');
-  const budget = prompt('Enter budget');
-  const preferredDate = prompt('Preferred date (YYYY-MM-DD)');
+  appState.modalContext = { type: 'service-request', serviceId };
+  openModal(`
+    <div class="stack-list">
+      <h3>Request Service</h3>
+      <p><strong>${service?.title || 'Service'}</strong></p>
+      <p class="card-meta">Price: Rs ${service?.price || 0} ${service?.priceUnit || ''}</p>
+      <div class="form-grid">
+        <textarea id="requestDescription" placeholder="Describe what you need"></textarea>
+        <input id="requestLocation" type="text" placeholder="Service location">
+        <input id="requestBudget" type="number" min="0" placeholder="Budget">
+        <input id="requestDate" type="date" placeholder="Preferred date">
+        <button class="primary-btn" onclick="submitServiceRequest()">Submit Request</button>
+      </div>
+    </div>
+  `);
+}
+
+async function submitServiceRequest() {
+  const serviceId = appState.modalContext?.serviceId;
+  const description = document.getElementById('requestDescription')?.value.trim();
+  const location = document.getElementById('requestLocation')?.value.trim();
+  const budget = document.getElementById('requestBudget')?.value;
+  const preferredDate = document.getElementById('requestDate')?.value;
+
+  if (!serviceId || !description || !location) {
+    alert('Please fill the description and location');
+    return;
+  }
 
   try {
     await API.createServiceRequest({
@@ -363,7 +422,7 @@ async function requestService(serviceId) {
     });
     showNotification('Service request submitted');
     closeModal();
-    await loadTransactionalData();
+    await Promise.allSettled([loadTransactionalData(), loadDashboard()]);
   } catch (error) {
     alert(error.message);
   }
@@ -519,7 +578,11 @@ async function createProduct() {
       stock: Number(document.getElementById('newProductStock').value) || 0
     });
     showNotification('Product added');
-    await Promise.all([loadDashboard(), loadProducts(), loadHome()]);
+    document.getElementById('newProductName').value = '';
+    document.getElementById('newProductDescription').value = '';
+    document.getElementById('newProductPrice').value = '';
+    document.getElementById('newProductStock').value = '';
+    await Promise.allSettled([loadDashboard(), loadProducts(), loadHome(), loadEntrepreneurs()]);
   } catch (error) {
     alert(error.message);
   }
@@ -536,7 +599,12 @@ async function createService() {
       availability: document.getElementById('newServiceAvailability').value.trim()
     });
     showNotification('Service added');
-    await Promise.all([loadDashboard(), loadServices(), loadHome()]);
+    document.getElementById('newServiceTitle').value = '';
+    document.getElementById('newServiceDescription').value = '';
+    document.getElementById('newServicePrice').value = '';
+    document.getElementById('newServiceUnit').value = '';
+    document.getElementById('newServiceAvailability').value = '';
+    await Promise.allSettled([loadDashboard(), loadServices(), loadHome(), loadEntrepreneurs()]);
   } catch (error) {
     alert(error.message);
   }
