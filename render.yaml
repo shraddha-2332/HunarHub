@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: hunarhub
+    runtime: node
+    plan: free
+    buildCommand: npm install --prefix backend
+    startCommand: npm start --prefix backend
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@hunarhub.local
+      - key: ADMIN_PASSWORD
+        value: Admin@123
+      - key: MONGODB_URI
+        sync: false

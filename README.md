@@ -221,6 +221,29 @@ Suggested platforms from the project brief:
 - Vercel
 - Netlify
 
+### Recommended Deployment Option: Render
+
+This repository now includes a [render.yaml](/abs/path/c:/HunarHub/render.yaml) file for simpler deployment.
+
+#### Render Steps
+
+1. Push the repository to GitHub
+2. Create a MongoDB Atlas database
+3. Open Render and create a new Web Service from the GitHub repo
+4. Render should detect the `render.yaml` file automatically
+5. Add the `MONGODB_URI` environment variable in Render
+6. Deploy the project
+
+#### Important Deployment Files
+
+- [render.yaml](/abs/path/c:/HunarHub/render.yaml)
+- [backend/.env.example](/abs/path/c:/HunarHub/backend/.env.example)
+
+#### Notes
+
+- The frontend API base now automatically uses the deployed origin instead of hardcoded localhost
+- For local file opening, it still falls back to `http://localhost:5000/api`
+
 ## Non-Functional Considerations
 
 ### Performance
