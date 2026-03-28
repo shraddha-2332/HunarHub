@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HunarHub | Local Skills Marketplace</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="topbar">
+            <div class="brand-wrap">
+                <span class="brand-badge">HH</span>
+                <div>
+                    <p class="eyebrow">Digital Marketplace For Local Skills</p>
+                    <h1 class="brand">HunarHub</h1>
+                </div>
+            </div>
+            <nav class="topbar-actions">
+                <button class="ghost-btn" onclick="navigateTo('home')">Home</button>
+                <button class="ghost-btn" onclick="navigateTo('entrepreneurs')">Entrepreneurs</button>
+                <button class="ghost-btn" onclick="navigateTo('marketplace')">Marketplace</button>
+                <button class="ghost-btn" onclick="navigateTo('requests')">Requests</button>
+                <button class="ghost-btn" onclick="navigateTo('dashboard')">Dashboard</button>
+                <button id="authBtn" class="primary-btn" onclick="toggleAuth()">Login</button>
+            </nav>
+        </header>
+
+        <main class="layout">
+            <section id="home" class="section active">
+                <div class="hero-card">
+                    <div class="hero-copy">
+                        <p class="eyebrow">Internship Project | Local Discovery | Traditional Skills</p>
+                        <h2>Find trusted local micro-entrepreneurs for services and handmade products.</h2>
+                        <p>
+                            Browse cobblers, potters, tailors, artisans, and small vendors by category,
+                            location, and price. Place service requests, purchase products, and support
+                            community-based economic growth through one digital platform.
+                        </p>
+                        <div class="market-search">
+                            <input id="heroSearch" type="text" placeholder="Search entrepreneur, service, or product">
+                            <select id="heroCategory">
+                                <option value="">All categories</option>
+                                <option value="cobbler">Cobbler</option>
+                                <option value="potter">Potter</option>
+                                <option value="tailor">Tailor</option>
+                                <option value="artisan">Artisan</option>
+                                <option value="small_vendor">Small vendor</option>
+                            </select>
+                            <input id="heroLocation" type="text" placeholder="Enter locality or city">
+                            <button class="primary-btn" onclick="applyHeroSearch()">Search</button>
+                        </div>
+                        <div class="hero-actions">
+                            <button class="secondary-btn" onclick="navigateTo('entrepreneurs')">Browse Local Talent</button>
+                            <button class="ghost-btn" onclick="navigateTo('marketplace')">Explore Products & Services</button>
+                        </div>
+                    </div>
+                    <aside class="hero-side">
+                        <div id="heroMetrics" class="hero-metrics"></div>
+                        <div class="trust-card">
+                            <h3>Why HunarHub</h3>
+                            <ul class="feature-list">
+                                <li>Customer discovery beyond word-of-mouth</li>
+                                <li>Service booking and product selling in one place</li>
+                                <li>Admin verification for entrepreneur trust</li>
+                                <li>Order and request tracking for reliability</li>
+                            </ul>
+                        </div>
+                    </aside>
+                </div>
+
+                <div class="category-strip panel">
+                    <div class="section-heading">
+                        <h3>Browse By Category</h3>
+                        <p>Core trades covered in your project scope.</p>
+                    </div>
+                    <div id="categoryHighlights" class="category-grid"></div>
+                </div>
+
+                <div class="three-col-grid">
+                    <div class="panel">
+                        <div class="section-heading">
+                            <h3>Featured Entrepreneurs</h3>
+                            <button class="ghost-btn" onclick="navigateTo('entrepreneurs')">View All</button>
+                        </div>
+                        <div id="featuredEntrepreneurs" class="card-grid compact-grid"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="section-heading">
+                            <h3>Popular Services</h3>
+                            <button class="ghost-btn" onclick="navigateTo('marketplace')">Explore</button>
+                        </div>
+                        <div id="featuredServices" class="stack-list"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="section-heading">
+                            <h3>Handmade Products</h3>
+                            <button class="ghost-btn" onclick="navigateTo('marketplace')">Shop</button>
+                        </div>
+                        <div id="featuredProducts" class="stack-list"></div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="section-heading">
+                        <h3>Platform Scope Coverage</h3>
+                        <p>Built to match your internship problem statement and deliverables.</p>
+                    </div>
+                    <div class="coverage-grid">
+                        <div class="list-card"><h5>Customers</h5><p>Registration, browsing, filters, profiles, orders, service requests, history, and reviews.</p></div>
+                        <div class="list-card"><h5>Entrepreneurs</h5><p>Profile creation, listing management, availability, request handling, orders, and earnings view.</p></div>
+                        <div class="list-card"><h5>Admin</h5><p>Verification, monitoring, analytics, and operational visibility.</p></div>
+                        <div class="list-card"><h5>Marketplace</h5><p>One responsive web platform for local service discovery and handmade product selling.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="entrepreneurs" class="section">
+                <div class="panel">
+                    <div class="section-heading">
+                        <h3>Discover Local Entrepreneurs</h3>
+                        <p>Search by category, location, affordability, and verification status.</p>
+                    </div>
+                    <div class="filters">
+                        <input id="entrepreneurSearch" type="text" placeholder="Search by name, skill, or expertise">
+                        <select id="entrepreneurCategory">
+                            <option value="">All categories</option>
+                            <option value="cobbler">Cobbler</option>
+                            <option value="potter">Potter</option>
+                            <option value="tailor">Tailor</option>
+                            <option value="artisan">Artisan</option>
+                            <option value="small_vendor">Small vendor</option>
+                        </select>
+                        <input id="entrepreneurLocation" type="text" placeholder="Location">
+                        <input id="entrepreneurMinPrice" type="number" placeholder="Min price">
+                        <input id="entrepreneurMaxPrice" type="number" placeholder="Max price">
+                        <button class="primary-btn" onclick="loadEntrepreneurs()">Apply Filters</button>
+                    </div>
+                    <div id="entrepreneursGrid" class="card-grid"></div>
+                </div>
+            </section>
+
+            <section id="marketplace" class="section">
+                <div class="two-panel-grid">
+                    <div class="panel">
+                        <div class="section-heading">
+                            <h3>Product Marketplace</h3>
+                            <p>Handmade items from local entrepreneurs.</p>
+                        </div>
+                        <div class="filters">
+                            <input id="productSearch" type="text" placeholder="Search products">
+                            <select id="productCategory">
+                                <option value="">All categories</option>
+                                <option value="cobbler">Cobbler</option>
+                                <option value="potter">Potter</option>
+                                <option value="tailor">Tailor</option>
+                                <option value="artisan">Artisan</option>
+                                <option value="small_vendor">Small vendor</option>
+                            </select>
+                            <input id="productLocation" type="text" placeholder="Location">
+                            <input id="productMinPrice" type="number" placeholder="Min price">
+                            <input id="productMaxPrice" type="number" placeholder="Max price">
+                            <button class="primary-btn" onclick="loadProducts()">Apply Filters</button>
+                        </div>
+                        <div id="productsGrid" class="card-grid"></div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="section-heading">
+                            <h3>Service Marketplace</h3>
+                            <p>Request work from skilled local professionals.</p>
+                        </div>
+                        <div class="filters">
+                            <input id="serviceSearch" type="text" placeholder="Search services">
+                            <select id="serviceCategory">
+                                <option value="">All categories</option>
+                                <option value="cobbler">Cobbler</option>
+                                <option value="potter">Potter</option>
+                                <option value="tailor">Tailor</option>
+                                <option value="artisan">Artisan</option>
+                                <option value="small_vendor">Small vendor</option>
+                            </select>
+                            <input id="serviceLocation" type="text" placeholder="Location">
+                            <input id="serviceMinPrice" type="number" placeholder="Min price">
+                            <input id="serviceMaxPrice" type="number" placeholder="Max price">
+                            <button class="primary-btn" onclick="loadServices()">Apply Filters</button>
+                        </div>
+                        <div id="servicesGrid" class="card-grid"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="requests" class="section">
+                <div class="panel">
+                    <div class="section-heading">
+                        <h3>Order and Service Request Management</h3>
+                        <p>Supports customer history, entrepreneur actioning, and status tracking.</p>
+                    </div>
+                    <div class="two-panel-grid">
+                        <div>
+                            <h4>Orders</h4>
+                            <div id="ordersList" class="stack-list"></div>
+                        </div>
+                        <div>
+                            <h4>Service Requests</h4>
+                            <div id="serviceRequestsList" class="stack-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dashboard" class="section">
+                <div class="panel">
+                    <div class="section-heading">
+                        <h3>Dashboard</h3>
+                        <p>Customer, entrepreneur, and admin workflows in one responsive interface.</p>
+                    </div>
+                    <div id="dashboardSummary" class="stats-grid"></div>
+                </div>
+
+                <div class="two-panel-grid">
+                    <div class="panel">
+                        <h4>Profile Management</h4>
+                        <form id="profileForm" class="form-grid">
+                            <input id="profileName" type="text" placeholder="Full name">
+                            <input id="profilePhone" type="text" placeholder="Phone">
+                            <input id="profileLocation" type="text" placeholder="Location">
+                            <input id="profileAddress" type="text" placeholder="Address">
+                            <select id="profileSkillType">
+                                <option value="other">Category</option>
+                                <option value="cobbler">Cobbler</option>
+                                <option value="potter">Potter</option>
+                                <option value="tailor">Tailor</option>
+                                <option value="artisan">Artisan</option>
+                                <option value="small_vendor">Small vendor</option>
+                            </select>
+                            <input id="profileExperience" type="number" placeholder="Experience years">
+                            <input id="profileSkills" type="text" placeholder="Skills, comma separated">
+                            <input id="profilePricing" type="text" placeholder="Pricing details">
+                            <input id="profileAvailability" type="text" placeholder="Availability">
+                            <textarea id="profileBio" placeholder="Bio"></textarea>
+                            <textarea id="profileGallery" placeholder="Product or gallery image URLs, comma separated"></textarea>
+                            <button type="button" class="primary-btn" onclick="saveProfile()">Save Profile</button>
+                        </form>
+                    </div>
+
+                    <div id="entrepreneurTools" class="panel hidden">
+                        <div class="section-heading">
+                            <h4>Micro-Entrepreneur Tools</h4>
+                            <p>Manage listings, requests, availability, and earnings view.</p>
+                        </div>
+                        <div class="stack-list">
+                            <form class="form-grid compact-form" onsubmit="event.preventDefault(); createProduct();">
+                                <h5>Add Product</h5>
+                                <input id="newProductName" type="text" placeholder="Product name" required>
+                                <textarea id="newProductDescription" placeholder="Description"></textarea>
+                                <input id="newProductPrice" type="number" placeholder="Price" required>
+                                <select id="newProductCategory">
+                                    <option value="artisan">Category</option>
+                                    <option value="cobbler">Cobbler</option>
+                                    <option value="potter">Potter</option>
+                                    <option value="tailor">Tailor</option>
+                                    <option value="artisan">Artisan</option>
+                                    <option value="small_vendor">Small vendor</option>
+                                </select>
+                                <input id="newProductStock" type="number" placeholder="Stock">
+                                <button class="primary-btn" type="submit">Add Product</button>
+                            </form>
+
+                            <form class="form-grid compact-form" onsubmit="event.preventDefault(); createService();">
+                                <h5>Add Service</h5>
+                                <input id="newServiceTitle" type="text" placeholder="Service title" required>
+                                <textarea id="newServiceDescription" placeholder="Description"></textarea>
+                                <input id="newServicePrice" type="number" placeholder="Price" required>
+                                <input id="newServiceUnit" type="text" placeholder="Price unit">
+                                <select id="newServiceCategory">
+                                    <option value="artisan">Category</option>
+                                    <option value="cobbler">Cobbler</option>
+                                    <option value="potter">Potter</option>
+                                    <option value="tailor">Tailor</option>
+                                    <option value="artisan">Artisan</option>
+                                    <option value="small_vendor">Small vendor</option>
+                                </select>
+                                <input id="newServiceAvailability" type="text" placeholder="Availability">
+                                <button class="primary-btn" type="submit">Add Service</button>
+                            </form>
+                        </div>
+                        <div class="two-panel-grid">
+                            <div>
+                                <h5>My Products</h5>
+                                <div id="myProducts" class="stack-list"></div>
+                            </div>
+                            <div>
+                                <h5>My Services</h5>
+                                <div id="myServices" class="stack-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="adminTools" class="panel hidden">
+                    <div class="section-heading">
+                        <h4>Admin Control Center</h4>
+                        <p>Verification, platform monitoring, operations, and reports.</p>
+                    </div>
+                    <div id="adminAnalytics" class="stats-grid"></div>
+                    <div class="two-panel-grid">
+                        <div>
+                            <h5>Entrepreneur Verification</h5>
+                            <div id="adminEntrepreneurs" class="stack-list"></div>
+                        </div>
+                        <div>
+                            <h5>Orders, Requests, and Operations</h5>
+                            <div id="adminOperations" class="stack-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="auth" class="section">
+                <div class="auth-wrapper">
+                    <div class="panel">
+                        <h3>Login</h3>
+                        <form class="form-grid" onsubmit="event.preventDefault(); handleLogin();">
+                            <input id="loginEmail" type="email" placeholder="Email" required>
+                            <input id="loginPassword" type="password" placeholder="Password" required>
+                            <button class="primary-btn" type="submit">Login</button>
+                        </form>
+                        <p class="helper-text">Demo admin login: <code>admin@hunarhub.local</code> / <code>Admin@123</code></p>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Register</h3>
+                        <form class="form-grid" onsubmit="event.preventDefault(); handleRegister();">
+                            <input id="regName" type="text" placeholder="Full name" required>
+                            <input id="regEmail" type="email" placeholder="Email" required>
+                            <input id="regPassword" type="password" placeholder="Password" required>
+                            <input id="regPhone" type="text" placeholder="Phone">
+                            <input id="regLocation" type="text" placeholder="Location">
+                            <select id="regRole">
+                                <option value="customer">Register as Customer</option>
+                                <option value="entrepreneur">Register as Micro-Entrepreneur</option>
+                            </select>
+                            <select id="regSkillType">
+                                <option value="other">Skill Category</option>
+                                <option value="cobbler">Cobbler</option>
+                                <option value="potter">Potter</option>
+                                <option value="tailor">Tailor</option>
+                                <option value="artisan">Artisan</option>
+                                <option value="small_vendor">Small vendor</option>
+                            </select>
+                            <input id="regSkills" type="text" placeholder="Skills, comma separated">
+                            <textarea id="regBio" placeholder="Short bio"></textarea>
+                            <button class="primary-btn" type="submit">Create Account</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer panel">
+            <div>
+                <h4>HunarHub</h4>
+                <p>Empowering local micro-entrepreneurs with digital visibility, service discovery, and sustainable commerce.</p>
+            </div>
+            <div class="footer-grid">
+                <div>
+                    <strong>Coverage</strong>
+                    <p>Cobblers, potters, tailors, artisans, and small vendors.</p>
+                </div>
+                <div>
+                    <strong>Core Modules</strong>
+                    <p>Profiles, products, services, orders, requests, reviews, admin analytics.</p>
+                </div>
+                <div>
+                    <strong>Goal</strong>
+                    <p>Promote local talent, reduce middlemen, and support community growth.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal()">Close</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../app.js"></script>
+</body>
+</html>
